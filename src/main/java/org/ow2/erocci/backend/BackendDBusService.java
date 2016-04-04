@@ -34,7 +34,7 @@ public class BackendDBusService {
 	private Logger logger = Logger.getLogger(this.getClass().getName());
 	
 	private DBusConnection dbusConnection;
-	private CoreImpl coreImpl = new CoreImpl();
+private CoreImpl coreImpl = new CoreImpl();
 
 	// private ActionImpl actionImpl = new ActionImpl();
 	
@@ -91,10 +91,14 @@ public class BackendDBusService {
                 new BackendDBusService()
                         .setSchema(BackendDBusService.class.getResourceAsStream("/docker-schema.xml"))
                         .start("org.ow2.erocci.backend");
-            } else {
-                throw new RuntimeException("Argument is not known : " + " , usage: " + " 'docker' or no arguments for infrastructure generic model.");
+            } else if(args[0].equals("cloud")) {
+                new BackendDBusService()
+                        .setSchema(BackendDBusService.class.getResourceAsStream("/cloud-schema.xml"))
+                        .start("org.ow2.erocci.backend");
+            }else {
+                throw new RuntimeException("Argument is not known : " + " , usage: " + " 'docker', 'cloud' or no arguments for infrastructure generic model.");
             }
-        }
+		}
 		ConfigurationManager.getConfigurationForOwner(ConfigurationManager.DEFAULT_OWNER);
 		
 	}
