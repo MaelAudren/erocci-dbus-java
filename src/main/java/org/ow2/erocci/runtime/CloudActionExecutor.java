@@ -16,38 +16,43 @@
 package org.ow2.erocci.runtime;
 
 import java.util.Map;
+import java.util.logging.Logger;
 
+import org.ow2.erocci.model.exception.ExecuteActionException;
 import org.occiware.clouddesigner.occi.Entity;
 import org.occiware.clouddesigner.occi.Extension;
-import org.ow2.erocci.model.exception.ExecuteActionException;
 
 public class CloudActionExecutor extends AbstractActionExecutor implements IActionExecutor {
 
+	private Logger logger = Logger.getLogger("Cloud executor");
+
 	private CloudActionExecutor() {
-        super();
+		super();
+        logger.info("defult conctrucor");
     }
     
     public CloudActionExecutor(Extension extension) {
 		super(extension);
+        logger.info("extension constructor");
 		// TODO Auto-generated constructor stub
 	}
 
 	@Override
 	public void occiPostCreate(Entity entity) throws ExecuteActionException {
 		// TODO Auto-generated method stub
-
+		logger.info("create");
 	}
 
 	@Override
 	public void occiPreDelete(Entity entity) throws ExecuteActionException {
 		// TODO Auto-generated method stub
-
+		logger.info("pre delete");
 	}
 
 	@Override
 	public void occiPostUpdate(Entity entity) throws ExecuteActionException {
 		// TODO Auto-generated method stub
-
+		logger.info("post update");
 	}
 
 	@Override
@@ -65,14 +70,14 @@ public class CloudActionExecutor extends AbstractActionExecutor implements IActi
 	@Override
 	public void execute(String actionId, Entity entity, String fromMethod) throws ExecuteActionException {
 		// TODO Auto-generated method stub
-		
+		logger.info("execute");
 	}
 
 	@Override
 	public void execute(String actionId, Map<String, String> actionAttributes, Entity entity, String fromMethod)
 			throws ExecuteActionException {
 		// TODO Auto-generated method stub
-		
+		logger.info("execute with attributes");
 	}
 
     
@@ -83,6 +88,5 @@ public class CloudActionExecutor extends AbstractActionExecutor implements IActi
     private static class CloudActionExecutorHolder {
         private final static CloudActionExecutor INSTANCE = new CloudActionExecutor();
     }
-
 
 }

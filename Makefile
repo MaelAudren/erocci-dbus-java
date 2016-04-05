@@ -26,7 +26,7 @@ ifeq ($(MVN),)
 $(error "Missing maven command...")
 endif
 
-MVN_FLAGS = -Djava.library.path=$(JNI_PATH)
+MVN_FLAGS = -Djava.library.path=$(JNI_PATH) 
 
 JAR = target/$(PROJECT)-$(FULL_VERSION).jar
 SERVICE = org.ow2.erocci.backend.BackendDBusService
@@ -59,7 +59,13 @@ deps_dbus_java:
 endif
 
 run: all
-	$(MVN) exec:java $(MVN_FLAGS) -Dexec.mainClass="$(SERVICE)"
+	$(MVN) exec:java $(MVN_FLAGS) -Dexec.mainClass="$(SERVICE)" 
+
+cloud: all
+	$(MVN) exec:java $(MVN_FLAGS) -Dexec.mainClass="$(SERVICE)" -Dexec.args="cloud" 
+
+docker: all
+	$(MVN) exec:java $(MVN_FLAGS) -Dexec.mainClass="$(SERVICE)" -Dexec.args="docker" 
 
 clean:
 	$(MVN) clean
