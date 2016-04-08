@@ -23,6 +23,19 @@ See "troubleshooting" part below in case of error.
 $ make run
 ```
 
+## Run dbus for docker
+
+```sh
+$ make docker
+```
+
+## Run dbus for cloud connectors
+
+```sh
+$ make cloud
+```
+
+
 ## Project format
 
 `src/main/dbus/` contains the XML file describing the erocci DBus interface.
