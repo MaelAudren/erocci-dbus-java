@@ -834,6 +834,7 @@ public class ConfigurationManager {
      * @return an hmap (key: owner, value : List of entities).
      */
     public static Map<String, List<Entity>> findAllEntitiesForCategoryId(final String categoryId) {
+        logger.info("list1");
         Map<String, List<Entity>> entitiesMap = new HashMap<>();
         if (configurations.isEmpty()) {
             return entitiesMap;
@@ -926,7 +927,7 @@ public class ConfigurationManager {
      * @return a map by owner and list of user mixins, map is empty if none found.
      */
     public static Map<String,List<String>> findAllUserMixinKindByLocation(final String location) {
-    	
+    	logger.info("list2");
     	List<String> mixinKinds;
     	Map<String, List<String>> mixinKindsByOwner = new HashMap<>();
     	// Recherche sur tous les users mixin kinds.
@@ -939,6 +940,7 @@ public class ConfigurationManager {
     		mixinKinds = new ArrayList<>();
     		config = getConfigurationForOwner(owner);
     		mixins = config.getMixins();
+
     		for (Mixin mixin : mixins) {
     			mixinId = mixin.getScheme() + mixin.getTerm();
     			locationTmp = userMixinLocationMap.get(mixinId);
@@ -1055,6 +1057,7 @@ public class ConfigurationManager {
      * @return entities
      */
     public static Map<String, Entity> findEntitiesOnAllOwner(final String entityId) {
+        logger.info("llist3");
         Entity entity;
         Map<String, Entity> entitiesMap = new HashMap<>();
         for (String owner : configurations.keySet()) {
