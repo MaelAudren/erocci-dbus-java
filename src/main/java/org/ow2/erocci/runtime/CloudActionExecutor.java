@@ -25,7 +25,6 @@ import org.occiware.clouddesigner.occi.Entity;
 import org.occiware.clouddesigner.occi.Extension;
 import org.occiware.clouddesigner.occi.cloud.CloudFactory;
 import org.occiware.clouddesigner.occi.cloud.CloudPackage;
-import org.occiware.clouddesigner.occi.cloud.Machine;
 import org.occiware.clouddesigner.occi.cloud.Machine_OpenStack;
 import org.occiware.clouddesigner.occi.cloud.connector.ExecutableCloudFactory;
 
@@ -50,13 +49,15 @@ public class CloudActionExecutor extends AbstractActionExecutor implements IActi
     private static final String OPENSTACK_TENANT = "tenant";
     private static final String OPENSTACK_USERNAME = "username";
     private static final String OPENSTACK_PASSWORD = "password";
-    private static final String OPENSTACK_FLOATING_ID_POOL = "floating_id_pool";
+    private static final String OPENSTACK_FLOATING_ID_POOL = "floating_ip_pool";
     private static final String OPENSTACK_SECURITY_GROUP = "security_group";
     private static final String OPENSTACK_KEYPAIR = "keypair";
     private static final String OPENSTACK_NETWORK_ID = "network_id";
     private static final String OPENSTACK_ENDPOINT = "endpoint";
 
     //private final CloudFactory factory = CloudPackage.eINSTANCE.getCloudFactory();
+
+    private Machine_OpenStack machine = null;
 
 	private CloudActionExecutor() {
         super();
@@ -71,8 +72,8 @@ public class CloudActionExecutor extends AbstractActionExecutor implements IActi
         entityTypeMap = new HashMap<>();
 	}
 
-    private Machine_OpenStack setOpenstackMachineAttributes(Entity entity){
-        Machine_OpenStack machine = (Machine_OpenStack) entity;
+    private Machine_OpenStack setOpenstackMachineAttributes(Machine_OpenStack machine, Entity entity){
+
         for(AttributeState attribute : entity.getAttributes() ){
             switch (attribute.getName()){
                 case OPENSTACK_NAME :
@@ -115,7 +116,6 @@ public class CloudActionExecutor extends AbstractActionExecutor implements IActi
 
 	@Override
 	public void occiPostCreate(Entity entity) throws ExecuteActionException {
-		Machine machine = null;
         switch (entity.getKind().getTerm()) {
             case EC2_TERM:
                 logger.info("EC2 is not implemented yet");
@@ -140,15 +140,16 @@ public class CloudActionExecutor extends AbstractActionExecutor implements IActi
                 break;
             case OPENSTACK_TERM:
                 try{
+
                     logger.info("openstack deployment");
                     ExecutableCloudFactory.init();
                     logger.info("init works");
                     CloudFactory factory = CloudPackage.eINSTANCE.getCloudFactory();
                     logger.info("cloud package works");
-                    Machine_OpenStack m = factory.eINSTANCE.createMachine_OpenStack();
+                    machine = factory.eINSTANCE.createMachine_OpenStack();
                     logger.info("machine openstack created");
-                    m.start();
-                    logger.info("machine started");
+                    machine = setOpenstackMachineAttributes(machine,entity);
+                    logger.info("machine attributes set");
                 }catch(Exception e){
                     logger.info("EXCEPTION");
                     logger.info(e.toString());
@@ -187,6 +188,13 @@ public class CloudActionExecutor extends AbstractActionExecutor implements IActi
 	public void execute(String actionId, Entity entity, String fromMethod) throws ExecuteActionException {
 		// TODO Auto-generated method stub
 		logger.info("execute");
+        try {
+            machine.start();
+            logger.info("machine started");
+        }catch (Exception e){
+            logger.info("EXCEPTION");
+            logger.info(e.toString());
+        }
 	}
 
 	@Override
@@ -194,6 +202,13 @@ public class CloudActionExecutor extends AbstractActionExecutor implements IActi
 			throws ExecuteActionException {
 		// TODO Auto-generated method stub
 		logger.info("execute with attributes");
+        try {
+            machine.start();
+            logger.info("machine started");
+        }catch (Exception e){
+            logger.info("EXCEPTION");
+            logger.info(e.toString());
+        }
 	}
 
     
