@@ -25,8 +25,12 @@ import org.occiware.clouddesigner.occi.Entity;
 import org.occiware.clouddesigner.occi.Extension;
 import org.occiware.clouddesigner.occi.cloud.CloudFactory;
 import org.occiware.clouddesigner.occi.cloud.CloudPackage;
+import org.occiware.clouddesigner.occi.cloud.Machine;
 import org.occiware.clouddesigner.occi.cloud.Machine_OpenStack;
 import org.occiware.clouddesigner.occi.cloud.connector.ExecutableCloudFactory;
+import org.occiware.clouddesigner.occi.infrastructure.RestartMethod;
+import org.occiware.clouddesigner.occi.infrastructure.StopMethod;
+import org.occiware.clouddesigner.occi.infrastructure.SuspendMethod;
 
 public class CloudActionExecutor extends AbstractActionExecutor implements IActionExecutor {
 
@@ -55,12 +59,16 @@ public class CloudActionExecutor extends AbstractActionExecutor implements IActi
     private static final String OPENSTACK_NETWORK_ID = "network_id";
     private static final String OPENSTACK_ENDPOINT = "endpoint";
 
-    //private final CloudFactory factory = CloudPackage.eINSTANCE.getCloudFactory();
+    private static final String START = "http://schemas.ogf.org/occi/infrastructure/compute/action#start";
+    private static final String STOP = "http://schemas.ogf.org/occi/infrastructure/compute/action#stop";
+    private static final String RESTART = "http://schemas.ogf.org/occi/infrastructure/compute/action#restart";
+    private static final String SUSPEND = "http://schemas.ogf.org/occi/infrastructure/compute/action#suspend";
 
-    private Machine_OpenStack machine = null;
+    private Map<String,Machine> instances;
 
 	private CloudActionExecutor() {
         super();
+        instances = new HashMap<>();
         //ExecutableCloudFactory.init();
         logger.info("default conctructor");
         entityTypeMap = new HashMap<>();
@@ -68,10 +76,211 @@ public class CloudActionExecutor extends AbstractActionExecutor implements IActi
     
     public CloudActionExecutor(Extension extension) {
 		super(extension);
+        instances = new HashMap<>();
         logger.info("extension constructor");
         entityTypeMap = new HashMap<>();
 	}
 
+	@Override
+	public void occiPostCreate(Entity entity) throws ExecuteActionException {
+
+        logger.info("post create");
+        ExecutableCloudFactory.init();
+        logger.info("init works");
+        CloudFactory factory = CloudPackage.eINSTANCE.getCloudFactory();
+        logger.info("cloud package works");
+        switch (entity.getKind().getTerm()) {
+            case EC2_TERM:
+                logger.info("EC2 is not implemented yet");
+				break;
+            case CLOUD_SIGMA_TERM:
+                logger.info("sigma is not implemented yet");
+                break;
+            case GOGRID_TERM:
+                logger.info("gogrid is not implemented yet");
+                break;
+            case HP_HELION_TERM:
+                logger.info("helion is not implemented yet");
+                break;
+            case RACKSPACE_TERM:
+                logger.info("rackspace is not implemented yet");
+                break;
+            case PROFITBRICKS_TERM:
+                logger.info("profitbricks is not implemented yet");
+                break;
+            case GCE_TERM:
+                logger.info("gce is not implemented yet");
+                break;
+            case OPENSTACK_TERM:
+                try{
+                    Machine_OpenStack machine = factory.eINSTANCE.createMachine_OpenStack();
+                    logger.info("machine openstack created");
+                    machine = setOpenstackMachineAttributes(machine,entity);
+                    instances.put(entity.getId(),machine);
+                    logger.info("machine attributes set");
+                }catch(Exception e){
+                    logger.info("EXCEPTION");
+                    logger.info(e.toString());
+                }
+                break;
+            default:
+                logger.info("no matching term found");
+        }
+	}
+
+	@Override
+	public void occiPreDelete(Entity entity) throws ExecuteActionException {
+		logger.info("pre delete");
+	}
+
+	@Override
+	public void occiPostUpdate(Entity entity) throws ExecuteActionException {
+		// TODO Auto-generated method stub
+		logger.info("post update");
+
+	}
+
+	@Override
+	public void occiMixinAdded(String mixinId) throws ExecuteActionException {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void occiMixinDeleted(String mixinId) throws ExecuteActionException {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void execute(String actionId, Entity entity, String fromMethod) throws ExecuteActionException {
+        execute(actionId,new HashMap<String,String>(),entity,fromMethod);
+	}
+
+    /**
+     *  Execute the action on a machine
+     * @param actionId is the action to execute
+     * @param actionAttributes is the attributes which describes the action
+     * @param entity
+     * @param fromMethod
+     * @throws ExecuteActionException
+     */
+	@Override
+	public void execute(String actionId, Map<String, String> actionAttributes, Entity entity, String fromMethod)
+			throws ExecuteActionException {
+
+        Machine machine = instances.get(entity.getId());
+        logger.info("execute with attributes");
+
+        logger.info("displaying of the action attributes");
+        for(String s : actionAttributes.keySet()){
+            logger.info("actionAttributes key"+s);
+            logger.info("actionAttributes value"+actionAttributes.get(s));
+        }
+        logger.info("end of the actionattributes");
+
+        String method = null;
+        if(actionAttributes.keySet().contains("method")){
+            method = actionAttributes.get(method);
+        }
+
+        try {
+
+            switch (actionId) {
+                case START:
+                    logger.info("actionId = " + actionId);
+                    try {
+                        machine.start();
+                        logger.info("machine started");
+                    } catch (Exception e) {
+                        logger.info("EXCEPTION");
+                        logger.info(e.toString());
+                    }
+                    break;
+                case STOP:
+                    logger.info(STOP + "in development");
+                    if (!(method == null || method.equals("undefined"))) {
+                        machine.stop(getStopMethod(method));
+                    }
+                    break;
+                case RESTART:
+                    logger.info(RESTART + "in development");
+                    if (!(method == null || method.equals("undefined"))) {
+                        machine.restart(getRestartMethod(method));
+                    }
+                    break;
+                case SUSPEND:
+                    logger.info(SUSPEND + "in development");
+                    if (!(method == null || method.equals("undefined"))) {
+                        machine.suspend(getSuspendMethod(method));
+                    }
+                    break;
+            }
+        }catch(Exception e){
+            logger.info("ACTION ON MACHINE TRHOW EXCEPTION :" + e.getMessage());
+        }
+	}
+
+
+    /**
+     * Give the right object according to method
+     * @param method is the string from the user request
+     * @return the object matching with method
+     */
+    private StopMethod getStopMethod(String method){
+        if (method.equals(StopMethod.ACPIOFF.getLiteral())){
+            return StopMethod.ACPIOFF;
+        }else if(method.equals(StopMethod.GRACEFUL.getLiteral())){
+            return StopMethod.GRACEFUL;
+        }else if(method.equals(StopMethod.POWEROFF.getLiteral())){
+            return  StopMethod.POWEROFF;
+        }else{
+            logger.info("unknown method for stop the machine, defautl behaviour set : graceful stop");
+            return StopMethod.GRACEFUL;
+        }
+    }
+
+
+    /**
+     * Give the right object according to method
+     * @param method is the string from the user request
+     * @return the object matching with method
+     */
+    private RestartMethod getRestartMethod(String method){
+        if (method.equals(RestartMethod.COLD.getLiteral())){
+            return RestartMethod.COLD;
+        }else if(method.equals(RestartMethod.GRACEFUL.getLiteral())){
+            return RestartMethod.GRACEFUL;
+        }else if(method.equals(RestartMethod.WARM.getLiteral())){
+            return RestartMethod.WARM;
+        }else{
+            logger.info("unknown method for restart the machine, defautl behaviour set : graceful restart");
+            return RestartMethod.GRACEFUL;
+        }
+    }
+
+    /**
+     * Give the right object according to method
+     * @param method is the string from the user request
+     * @return the object matching with method
+     */
+    private SuspendMethod getSuspendMethod(String method){
+        if (method.equals(SuspendMethod.HIBERNATE.getLiteral())){
+            return SuspendMethod.HIBERNATE;
+        }else if(method.equals(SuspendMethod.SUSPEND.getLiteral())){
+            return SuspendMethod.SUSPEND;
+        }else{
+            logger.info("unknown method for suspend the machine, defautl behaviour set : graceful suspend");
+            return SuspendMethod.SUSPEND;
+        }
+    }
+
+    /**
+     *  Set the machine attributes accroding to the entity content
+     * @param machine is the machine that will have his attributes set
+     * @param entity is the entity that contains the data from the request
+     * @return the machine with the set attributes
+     */
     private Machine_OpenStack setOpenstackMachineAttributes(Machine_OpenStack machine, Entity entity){
 
         for(AttributeState attribute : entity.getAttributes() ){
@@ -114,104 +323,7 @@ public class CloudActionExecutor extends AbstractActionExecutor implements IActi
         return machine;
     }
 
-	@Override
-	public void occiPostCreate(Entity entity) throws ExecuteActionException {
-        switch (entity.getKind().getTerm()) {
-            case EC2_TERM:
-                logger.info("EC2 is not implemented yet");
-				break;
-            case CLOUD_SIGMA_TERM:
-                logger.info("sigma is not implemented yet");
-                break;
-            case GOGRID_TERM:
-                logger.info("gogrid is not implemented yet");
-                break;
-            case HP_HELION_TERM:
-                logger.info("helion is not implemented yet");
-                break;
-            case RACKSPACE_TERM:
-                logger.info("rackspace is not implemented yet");
-                break;
-            case PROFITBRICKS_TERM:
-                logger.info("profitbricks is not implemented yet");
-                break;
-            case GCE_TERM:
-                logger.info("gce is not implemented yet");
-                break;
-            case OPENSTACK_TERM:
-                try{
 
-                    logger.info("openstack deployment");
-                    ExecutableCloudFactory.init();
-                    logger.info("init works");
-                    CloudFactory factory = CloudPackage.eINSTANCE.getCloudFactory();
-                    logger.info("cloud package works");
-                    machine = factory.eINSTANCE.createMachine_OpenStack();
-                    logger.info("machine openstack created");
-                    machine = setOpenstackMachineAttributes(machine,entity);
-                    logger.info("machine attributes set");
-                }catch(Exception e){
-                    logger.info("EXCEPTION");
-                    logger.info(e.toString());
-                }
-                break;
-            default:
-                logger.info("no matching term found");
-        }
-	}
-
-	@Override
-	public void occiPreDelete(Entity entity) throws ExecuteActionException {
-		// TODO Auto-generated method stub
-		logger.info("pre delete");
-	}
-
-	@Override
-	public void occiPostUpdate(Entity entity) throws ExecuteActionException {
-		// TODO Auto-generated method stub
-		logger.info("post update");
-	}
-
-	@Override
-	public void occiMixinAdded(String mixinId) throws ExecuteActionException {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void occiMixinDeleted(String mixinId) throws ExecuteActionException {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void execute(String actionId, Entity entity, String fromMethod) throws ExecuteActionException {
-		// TODO Auto-generated method stub
-		logger.info("execute");
-        try {
-            machine.start();
-            logger.info("machine started");
-        }catch (Exception e){
-            logger.info("EXCEPTION");
-            logger.info(e.toString());
-        }
-	}
-
-	@Override
-	public void execute(String actionId, Map<String, String> actionAttributes, Entity entity, String fromMethod)
-			throws ExecuteActionException {
-		// TODO Auto-generated method stub
-		logger.info("execute with attributes");
-        try {
-            machine.start();
-            logger.info("machine started");
-        }catch (Exception e){
-            logger.info("EXCEPTION");
-            logger.info(e.toString());
-        }
-	}
-
-    
     public static IActionExecutor getInstance() {
         return CloudActionExecutorHolder.INSTANCE;
     }
