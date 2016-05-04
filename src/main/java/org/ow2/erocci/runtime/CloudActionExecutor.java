@@ -131,13 +131,58 @@ public class CloudActionExecutor extends AbstractActionExecutor implements IActi
 	@Override
 	public void occiPreDelete(Entity entity) throws ExecuteActionException {
 		logger.info("pre delete");
+        if(instances.keySet().contains(entity.getId())){
+            instances.remove(entity.getId());
+        }
+        else{
+            logger.info("The instance"+entity.getId()+"was not found");
+        }
 	}
 
 	@Override
 	public void occiPostUpdate(Entity entity) throws ExecuteActionException {
-		// TODO Auto-generated method stub
 		logger.info("post update");
-
+        if(instances.keySet().contains(entity.getId())){
+            try{
+                switch (entity.getKind().getTerm()) {
+                    case EC2_TERM:
+                        logger.info("EC2 is not implemented yet");
+                        break;
+                    case CLOUD_SIGMA_TERM:
+                        logger.info("sigma is not implemented yet");
+                        break;
+                    case GOGRID_TERM:
+                        logger.info("gogrid is not implemented yet");
+                        break;
+                    case HP_HELION_TERM:
+                        logger.info("helion is not implemented yet");
+                        break;
+                    case RACKSPACE_TERM:
+                        logger.info("rackspace is not implemented yet");
+                        break;
+                    case PROFITBRICKS_TERM:
+                        logger.info("profitbricks is not implemented yet");
+                        break;
+                    case GCE_TERM:
+                        logger.info("gce is not implemented yet");
+                        break;
+                    case OPENSTACK_TERM:
+                            Machine_OpenStack machine = (Machine_OpenStack) instances.get(entity.getId());
+                            Machine updated_machine = setOpenstackMachineAttributes(machine,entity);
+                            instances.put(entity.getId(),updated_machine);
+                            logger.info("machine attributes updated");
+                        break;
+                    default:
+                        logger.info("no matching term found");
+                }
+            }catch(Exception e){
+                logger.info("EXCEPTION");
+                logger.info(e.toString());
+            }
+        }
+        else{
+            logger.info("The instance"+entity.getId()+"was not found");
+        }
 	}
 
 	@Override
