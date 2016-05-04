@@ -15,7 +15,12 @@
  */
 package org.ow2.erocci.backend;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
+import java.util.Enumeration;
 import java.util.logging.Logger;
 
 import org.freedesktop.dbus.DBusConnection;
@@ -49,9 +54,15 @@ private CoreImpl coreImpl = new CoreImpl();
 		return this;
 	}
 	
+    public final BackendDBusService setMode(int mode) {
+        coreImpl.setMode(mode);
+        return this;
+    }
+    
+    
 	/**
 	 * Start the DBus service backend
-	 * @param name The DBus service name
+     * @param dbusServiceName The DBus service name
 	 * (if null or empty, the package name of the current class will be used).
 	 */
 	public final void start(String dbusServiceName) {
@@ -79,28 +90,64 @@ private CoreImpl coreImpl = new CoreImpl();
 	/**
 	 * Sample main program
 	 * @param args
+     * @throws java.io.FileNotFoundException
 	 */
-	public static void main(String[] args) {
-		if (args == null || args.length == 0) {
+	public static void main(String[] args) throws FileNotFoundException {
+		String schema = null;
+        boolean withFullPathSchema = false;
+        if (args == null || args.length == 0) {
             // Infrastructure schema is default. 
-            new BackendDBusService()
-                .setSchema(BackendDBusService.class.getResourceAsStream("/schema.xml"))
-                .start("org.ow2.erocci.backend");
+            schema = "/schema.xml";
         } else if (args.length == 1) {
-            if (args[0].equals("docker")) {
-                new BackendDBusService()
-                        .setSchema(BackendDBusService.class.getResourceAsStream("/docker-schema.xml"))
-                        .start("org.ow2.erocci.backend");
-            } else if(args[0].equals("cloud")) {
-                new BackendDBusService()
-                        .setSchema(BackendDBusService.class.getResourceAsStream("/cloud-schema.xml"))
-                        .start("org.ow2.erocci.backend");
-            }else {
-                throw new RuntimeException("Argument is not known : " + " , usage: " + " 'docker', 'cloud' or no arguments for infrastructure generic model.");
+
+            switch (args[0]) {
+                case "docker":
+                    schema = "/docker-schema.xml";
+                    break;
+                case "cloud":
+                    schema = "/cloud-schema.xml";
+                    break;
+                default:
+                    if (args[0] != null && args[0].endsWith(".xml")) {
+                        // Assign the schema with full path.
+                        schema = args[0];
+                        withFullPathSchema = true;
+                    } else {
+                        schema = null;
+                    }
+                    break;
             }
-		}
-		ConfigurationManager.getConfigurationForOwner(ConfigurationManager.DEFAULT_OWNER);
-		
+        } else if (args.length > 1 || schema == null) {
+            throw new RuntimeException("Argument is not known : " + " , usage: " + " 'docker' or no arguments for infrastructure generic model.");
+        }
+        if (schema == null) {
+        	throw new RuntimeException("Argument is not known : " + " , usage: " + " 'docker' or no arguments for infrastructure generic model.");
+        }
+        if (withFullPathSchema) {
+            new BackendDBusService()
+                    .setSchema(new FileInputStream(schema))
+                    .setMode(1)
+                    .start("org.ow2.erocci.backend");
+            
+        } else {
+            new BackendDBusService()
+                .setSchema(BackendDBusService.class.getResourceAsStream(schema))
+                .setMode(0)
+                .start("org.ow2.erocci.backend");
+        }
+        ConfigurationManager.getConfigurationForOwner(ConfigurationManager.DEFAULT_OWNER);
+        
+//        // For testing classpath entries..
+//        
+//        try {
+//            ClassLoader classLoader = BackendDBusService.class.getClassLoader();
+//            Enumeration<URL> pluginResources = classLoader.getResources("plugin.xml");
+//			for(URL url : java.util.Collections.list(pluginResources)) {
+//				System.out.println("  * " + url.toExternalForm() + "...");
+//            }
+//        } catch (IOException ex) {
+//            System.out.println("Exception io : " + ex.getMessage());
+//        }
 	}
 
 }

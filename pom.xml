@@ -18,7 +18,7 @@ the specific language governing permissions and limitations under the License. -
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
-
+    
     <dependencies>
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -70,6 +70,25 @@ the specific language governing permissions and limitations under the License. -
             <artifactId>org.occiware.clouddesigner.occi.infrastructure</artifactId>
             <version>0.1.0-SNAPSHOT</version>
         </dependency>
+        <dependency>
+            <!-- OCCI Infrastructure Generic Model implementation connector. -->
+            <groupId>Clouddesigner</groupId>
+            <artifactId>org.occiware.clouddesigner.occi.infrastructure.connector.dummy</artifactId>
+            <version>0.1.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <!-- OCCI Platform Generic Model implementation. -->
+            <groupId>Clouddesigner</groupId>
+            <artifactId>org.occiware.clouddesigner.occi.platform</artifactId>
+            <version>0.1.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <!-- OCCI Platform Generic Model implementation connector. -->
+            <groupId>Clouddesigner</groupId>
+            <artifactId>org.occiware.clouddesigner.occi.platform.connector.dummy</artifactId>
+            <version>0.1.0-SNAPSHOT</version>
+        </dependency>
+        
         <dependency>
             <!-- OCCI Docker Model implementation -->
             <groupId>Clouddesigner</groupId>
@@ -233,6 +252,7 @@ the specific language governing permissions and limitations under the License. -
 
     <build>
         <plugins>
+
             <!-- for the xtend code from the cloud connector -->
             <plugin>
                 <groupId>org.eclipse.xtend</groupId>
@@ -251,100 +271,356 @@ the specific language governing permissions and limitations under the License. -
                     </execution>
                 </executions>
             </plugin>
-<!--            <plugin>
+            <!--            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-install-plugin</artifactId>
+                <artifactId>maven-dependency-plugin</artifactId>
                 <executions>
                     <execution>
-                        <id>inst_1</id>
+                        <id>copy-dependencies</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/classes/lib</outputDirectory>
+                            <overWriteReleases>false</overWriteReleases>
+                            <overWriteSnapshots>false</overWriteSnapshots>
+                            <overWriteIfNewer>true</overWriteIfNewer>
+           <plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>2.6</version>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <addClasspath>true</addClasspath>
+                            <mainClass>org.ow2.erocci.backend.BackendDBusService</mainClass>
+                            <classpathPrefix>lib</classpathPrefix>
+                        </manifest>
+                        <manifestEntries>
+                            <Class-Path>lib/</Class-Path>
+                        </manifestEntries>
+                    </archive>
+                </configuration>
+            </plugin>
+             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.1</version>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                    <compilerArgs>
+                        <arg>-parameters</arg>
+                    </compilerArgs>
+                </configuration>
+            </plugin>-->
+            
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-install-plugin</artifactId>
+                <version>2.4</version>
+                <executions>
+                    <execution>
+                        <id>dbus</id>
                         <phase>initialize</phase>
                         <goals>
                             <goal>install-file</goal>
                         </goals>
                         <configuration>
-                            <file>lib/dbus-2.8.jar</file>
                             <groupId>net.windwards.3rdparty</groupId>
                             <artifactId>dbus</artifactId>
                             <version>2.8</version>
                             <packaging>jar</packaging>
+                            <file>${basedir}/lib/dbus-2.8.jar</file>
                         </configuration>
                     </execution>
                     <execution>
-                        <id>inst_2</id>
+                        <id>dbus-bin</id>
                         <phase>initialize</phase>
                         <goals>
                             <goal>install-file</goal>
                         </goals>
                         <configuration>
-                            <file>lib/dbus-bin-2.8.jar</file>
                             <groupId>net.windwards.3rdparty</groupId>
                             <artifactId>dbus-bin</artifactId>
                             <version>2.8</version>
                             <packaging>jar</packaging>
+                            <file>${basedir}/lib/dbus-bin-2.8.jar</file>
                         </configuration>
                     </execution>
                     <execution>
-                        <id>inst_3</id>
+                        <id>matthew-hexdump</id>
                         <phase>initialize</phase>
                         <goals>
                             <goal>install-file</goal>
                         </goals>
                         <configuration>
-                            <file>lib/hexdump-0.2.jar</file>
                             <groupId>net.windwards.3rdparty</groupId>
                             <artifactId>matthew-hexdump</artifactId>
                             <version>0.2</version>
                             <packaging>jar</packaging>
+                            <file>${basedir}/lib/hexdump-0.2.jar</file>
                         </configuration>
                     </execution>
                     <execution>
-                        <id>inst_4</id>
+                        <id>matthew-debug</id>
                         <phase>initialize</phase>
                         <goals>
                             <goal>install-file</goal>
                         </goals>
                         <configuration>
-                            <file>lib/unix-0.5.jar</file>
-                            <groupId>net.windwards.3rdparty</groupId>
-                            <artifactId>matthew-unix</artifactId>
-                            <version>0.5</version>
-                            <packaging>jar</packaging>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>inst_5</id>
-                        <phase>initialize</phase>
-                        <goals>
-                            <goal>install-file</goal>
-                        </goals>
-                        <configuration>
-                            <file>lib/debug-enable-1.1.jar</file>
                             <groupId>net.windwards.3rdparty</groupId>
                             <artifactId>matthew-debug</artifactId>
                             <version>1.1</version>
                             <packaging>jar</packaging>
+                            <file>${basedir}/lib/debug-enable-1.1.jar</file>
                         </configuration>
                     </execution>
+                    <execution>
+                        <id>matthew-unix</id>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>install-file</goal>
+                        </goals>
+                        <configuration>
+                            <groupId>net.windwards.3rdparty</groupId>
+                            <artifactId>matthew-unix</artifactId>
+                            <version>0.5</version>
+                            <packaging>jar</packaging>
+                            <file>${basedir}/lib/unix-0.5.jar</file>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>Clouddesigner-parent</id>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>install-file</goal>
+                        </goals>
+                        <configuration>
+                            <groupId>Clouddesigner</groupId>
+                            <artifactId>org.occiware.clouddesigner.parent</artifactId>
+                            <version>0.1.0-SNAPSHOT</version>
+                            <packaging>pom</packaging>
+                            <file>${basedir}/lib/org.occiware.clouddesigner.parent-0.1.0-SNAPSHOT.pom</file>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>Clouddesigner-occi</id>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>install-file</goal>
+                        </goals>
+                        <configuration>
+                            <groupId>Clouddesigner</groupId>
+                            <artifactId>org.occiware.clouddesigner.occi</artifactId>
+                            <version>0.1.0-SNAPSHOT</version>
+                            <packaging>jar</packaging>
+                            <file>${basedir}/lib/org.occiware.clouddesigner.occi-0.1.0-SNAPSHOT.jar</file>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>Clouddesigner-infra</id>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>install-file</goal>
+                        </goals>
+                        <configuration>
+                            <groupId>Clouddesigner</groupId>
+                            <artifactId>org.occiware.clouddesigner.occi.infrastructure</artifactId>
+                            <version>0.1.0-SNAPSHOT</version>
+                            <packaging>jar</packaging>
+                            <file>${basedir}/lib/org.occiware.clouddesigner.occi.infrastructure-0.1.0-SNAPSHOT.jar</file>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>Clouddesigner-infra-connector</id>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>install-file</goal>
+                        </goals>
+                        <configuration>
+                            <groupId>Clouddesigner</groupId>
+                            <artifactId>org.occiware.clouddesigner.occi.infrastructure.connector.dummy</artifactId>
+                            <version>0.1.0-SNAPSHOT</version>
+                            <packaging>jar</packaging>
+                            <file>${basedir}/lib/org.occiware.clouddesigner.occi.infrastructure.connector.dummy-0.1.0-SNAPSHOT.jar</file>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>Clouddesigner-platform</id>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>install-file</goal>
+                        </goals>
+                        <configuration>
+                            <groupId>Clouddesigner</groupId>
+                            <artifactId>org.occiware.clouddesigner.occi.platform</artifactId>
+                            <version>0.1.0-SNAPSHOT</version>
+                            <packaging>jar</packaging>
+                            <file>${basedir}/lib/org.occiware.clouddesigner.occi.platform-0.1.0-SNAPSHOT.jar</file>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>Clouddesigner-platform-connector</id>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>install-file</goal>
+                        </goals>
+                        <configuration>
+                            <groupId>Clouddesigner</groupId>
+                            <artifactId>org.occiware.clouddesigner.occi.platform.connector.dummy</artifactId>
+                            <version>0.1.0-SNAPSHOT</version>
+                            <packaging>jar</packaging>
+                            <file>${basedir}/lib/org.occiware.clouddesigner.occi.platform.connector.dummy-0.1.0-SNAPSHOT.jar</file>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>Clouddesigner-docker</id>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>install-file</goal>
+                        </goals>
+                        <configuration>
+                            <groupId>Clouddesigner</groupId>
+                            <artifactId>org.occiware.clouddesigner.occi.docker</artifactId>
+                            <version>0.1.0-SNAPSHOT</version>
+                            <packaging>jar</packaging>
+                            <file>${basedir}/lib/org.occiware.clouddesigner.occi.docker-0.1.0-SNAPSHOT.jar</file>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>Clouddesigner-docker-preference</id>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>install-file</goal>
+                        </goals>
+                        <configuration>
+                            <groupId>Clouddesigner</groupId>
+                            <artifactId>org.occiware.clouddesigner.occi.docker.preference</artifactId>
+                            <version>0.1.0-SNAPSHOT</version>
+                            <packaging>jar</packaging>
+                            <file>${basedir}/lib/org.occiware.clouddesigner.occi.docker.preference-0.1.0-SNAPSHOT.jar</file>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>Clouddesigner-docker-connector</id>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>install-file</goal>
+                        </goals>
+                        <configuration>
+                            <groupId>Clouddesigner</groupId>
+                            <artifactId>org.occiware.clouddesigner.occi.docker.connector</artifactId>
+                            <version>0.1.0-SNAPSHOT</version>
+                            <packaging>jar</packaging>
+                            <file>${basedir}/lib/org.occiware.clouddesigner.occi.docker.connector-0.1.0-SNAPSHOT.jar</file>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>eclipse-ocl</id>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>install-file</goal>
+                        </goals>
+                        <configuration>
+                            <groupId>org.eclipse.ocl</groupId>
+                            <artifactId>org.eclipse.ocl.pivot</artifactId>
+                            <version>1.0.1.v20150908-1239</version>
+                            <packaging>jar</packaging>
+                            <file>${basedir}/lib/org.eclipse.ocl.pivot-1.0.1.v20150908-1239.jar</file>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>eclipse-ocl-common</id>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>install-file</goal>
+                        </goals>
+                        <configuration>
+                            <groupId>org.eclipse.ocl</groupId>
+                            <artifactId>org.eclipse.ocl.common</artifactId>
+                            <version>1.3.0.v20150519-0914</version>
+                            <packaging>jar</packaging>
+                            <file>${basedir}/lib/org.eclipse.ocl.common-1.3.0.v20150519-0914.jar</file>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>docker-java</id>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>install-file</goal>
+                        </goals>
+                        <configuration>
+                            <groupId>com.github.docker-java</groupId>
+                            <artifactId>docker-java</artifactId>
+                            <version>3.0.0-SNAPSHOT</version>
+                            <packaging>jar</packaging>
+                            <file>${basedir}/lib/docker-java-3.0.0-SNAPSHOT-jar-with-dependencies.jar</file>
+                        </configuration>
+                    </execution>
+                   
                 </executions>
-            </plugin>-->
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>2.6</version>
+                <configuration>
+                    <descriptorRefs>
+                        <descriptorRef>jar-with-dependencies</descriptorRef>
+                    </descriptorRefs>
+                    <archive>
+                        <manifest>
+                            <addClasspath>true</addClasspath>
+                            <mainClass>org.ow2.erocci.backend.BackendDBusService</mainClass>
+                            <classpathPrefix>lib/</classpathPrefix>
+                        </manifest>
+                    </archive>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>assemble-all</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.5</version>
+                <version>3.1</version>
                 <configuration>
-                    <source>1.8</source><!-- (or 1.8) else 1.5 (coming from a dependency's 
-						pom) which makes @Override annotations be in error on java interface -->
+                    <source>1.8</source>
                     <target>1.8</target>
                     <compilerArgs>
                         <arg>-parameters</arg>
                     </compilerArgs>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>2.6</version>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <addClasspath>true</addClasspath>
+                            <mainClass>org.ow2.erocci.backend.BackendDBusService</mainClass>
+                            <classpathPrefix>lib/</classpathPrefix>
+                        </manifest>
+                    </archive>
+                </configuration>
+            </plugin>
+            
             
             <plugin>
                 <groupId>net.windwards</groupId>
                 <artifactId>maven-dbus-plugin</artifactId>
-<!--                version>0.2-SNAPSHOT</version -->
                 <version>0.1</version>
                 <executions>
                     <execution>
@@ -353,15 +629,13 @@ the specific language governing permissions and limitations under the License. -
                             <goal>generate</goal>
                         </goals>
                         <configuration>
-<!--                            interfaces>${basedir}/src/main/dbus</interfaces -->
                             <output>${basedir}/src/generated/java</output>
                         </configuration>
                     </execution>
                 </executions>
             </plugin>
 
-            <!-- Add src/generated/java as source directory (contains java files to 
-            compile) -->
+            <!-- Add src/generated/java as source directory (contains java files to compile) -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>

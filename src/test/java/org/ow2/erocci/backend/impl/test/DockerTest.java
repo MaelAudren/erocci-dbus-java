@@ -49,6 +49,7 @@ import org.occiware.clouddesigner.occi.Resource;
 import org.occiware.clouddesigner.occi.docker.Container;
 import org.occiware.clouddesigner.occi.docker.Machine;
 import org.occiware.clouddesigner.occi.infrastructure.ComputeStatus;
+import org.occiware.clouddesigner.occi.util.OcciHelper;
 import org.ow2.erocci.backend.Struct1;
 /**
  * Docker Tests connector.
@@ -63,7 +64,7 @@ public class DockerTest {
 	 */
 	private Map<String, InputContainer> containers;
     private final String SCHEME_INFRA = "http://schemas.ogf.org/occi/infrastructure#";
-    private final String SCHEME_DOCKER = "http://occiware.org/docker#";
+    private final String SCHEME_DOCKER = "http://occiware.org/occi/docker#";
     private final String VIRTUALBOX_KIND = SCHEME_DOCKER + "machine_VirtualBox";
     private final String CONTAINER_KIND = SCHEME_DOCKER + "container";
     private final String CONTAINS_KIND = SCHEME_DOCKER + "contains";
@@ -106,7 +107,7 @@ public class DockerTest {
 		for (Extension extension : exts) {
 
 			System.out.println("    * Extension " + extension.getName() + " " + extension.getScheme());
-			result = ConfigurationManager.validate(extension); // Validate
+			result = OcciHelper.validate(extension); // Validate
 																// extension.
 			assertTrue(result);
 			// print(extension);
@@ -114,7 +115,7 @@ public class DockerTest {
 		}
 
 		// Model validation with ocl.
-		result = ConfigurationManager.validate(ConfigurationManager.getConfigurationForOwner(DEFAULT_OWNER));
+		result = OcciHelper.validate(ConfigurationManager.getConfigurationForOwner(DEFAULT_OWNER));
 		// Print our configuration.
 		print(ConfigurationManager.getConfigurationForOwner(DEFAULT_OWNER));
 		assertTrue(result);
@@ -124,7 +125,7 @@ public class DockerTest {
     /**
      * Test on SaveResource core with docker extension.
      */
-    @Test
+    // @Test
     public void testSaveResourceDocker() {
         List<String> resourcePartialIds = new ArrayList<String>();
 		List<String> resourceIds = new ArrayList<String>();
@@ -227,35 +228,35 @@ public class DockerTest {
 		}
 		
     }
-    // @Test
-    public void testAction() {
-    	testSaveResourceDocker();
-    	
-    	// Launch the action with good kind.
-    	String machineId ="machine_VirtualBox/66f78046-84a5-45b6-8210-4c4abecb05f6";
-    	String containerId = "container/602f6de4-4a59-4dbe-81f0-9ade9e84aaca";
-    	// No such file or directory... docker-machine
-    	// docker-machine -D create --driver virtualbox testAlpha --virtualbox-disk-size 20000 --virtualbox-memory 1024.0 --virtualbox-cpu-count 4
-    	core.Action(machineId, ACTION_STARTALL, new HashMap<String, Variant>());
-    	
-    	Machine machine = (Machine)ConfigurationManager.findResource(DEFAULT_OWNER, machineId);
-    	assertTrue(machine.getState().equals(ComputeStatus.ACTIVE));
-    	// Get the linked container.
-    	Container container = (Container)ConfigurationManager.findResource(DEFAULT_OWNER, containerId);
-    	assertTrue(container.getState().equals(ComputeStatus.ACTIVE));
-    	
-    	// Stop the container.
-    	core.Action(containerId, ACTION_STOP_MACHINE, new HashMap<String, Variant>());
-    	container = (Container)ConfigurationManager.findResource(DEFAULT_OWNER, containerId);
-    	assertTrue(container.getState().equals(ComputeStatus.INACTIVE));
-    	
-    	// Stop the machine.
-    	core.Action(machineId, ACTION_STOP_MACHINE, new HashMap<String, Variant>());
-    	machine = (Machine)ConfigurationManager.findResource(DEFAULT_OWNER, machineId);
-    	assertTrue(machine.getState().equals(ComputeStatus.INACTIVE));
-    	
-    	
-    }
+//     @Test
+//    public void testAction() {
+//    	testSaveResourceDocker();
+//    	
+//    	// Launch the action with good kind.
+//    	String machineId ="machine_VirtualBox/66f78046-84a5-45b6-8210-4c4abecb05f6";
+//    	String containerId = "container/602f6de4-4a59-4dbe-81f0-9ade9e84aaca";
+//    	// No such file or directory... docker-machine
+//    	// docker-machine -D create --driver virtualbox testAlpha --virtualbox-disk-size 20000 --virtualbox-memory 1024.0 --virtualbox-cpu-count 4
+//    	core.Action(machineId, ACTION_STARTALL, new HashMap<String, Variant>());
+//    	
+//    	Machine machine = (Machine)ConfigurationManager.findResource(DEFAULT_OWNER, machineId);
+//    	assertTrue(machine.getState().equals(ComputeStatus.ACTIVE));
+//    	// Get the linked container.
+//    	Container container = (Container)ConfigurationManager.findResource(DEFAULT_OWNER, containerId);
+//    	assertTrue(container.getState().equals(ComputeStatus.ACTIVE));
+//    	
+//    	// Stop the container.
+//    	core.Action(containerId, ACTION_STOP_MACHINE, new HashMap<String, Variant>());
+//    	container = (Container)ConfigurationManager.findResource(DEFAULT_OWNER, containerId);
+//    	assertTrue(container.getState().equals(ComputeStatus.INACTIVE));
+//    	
+//    	// Stop the machine.
+//    	core.Action(machineId, ACTION_STOP_MACHINE, new HashMap<String, Variant>());
+//    	machine = (Machine)ConfigurationManager.findResource(DEFAULT_OWNER, machineId);
+//    	assertTrue(machine.getState().equals(ComputeStatus.INACTIVE));
+//    	
+//    	
+//    }
     
     private void buildDockerTest() {
         ConfigurationManager.resetAll();
